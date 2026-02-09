@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArcBid | 机密拍卖协议演示</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono&display=swap');
+        
+        :root {
+            --primary: #f59e0b; /* 琥珀/黄金色调 */
+            --accent: #8b5cf6;
+            --bg: #030712;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: #f1f5f9;
+        }
+
+        .mono { font-family: 'JetBrains+Mono', monospace; }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .auction-gradient {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        }
+
+        .glow-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+        }
+
+        .glow-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.3);
+        }
+
+        .compute-pulse {
+            animation: ring-pulse 2s infinite;
+        }
+
+        @keyframes ring-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="border-b border-slate-800/60 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/20">
+                    <i class="fas fa-gavel text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">ArcBid</h1>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-black">Confidential Auction v1.0</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-8">
+                <div class="hidden md:flex gap-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                    <a href="#" class="hover:text-amber-400 transition">当前拍卖</a>
+                    <a href="#" class="hover:text-amber-400 transition">技术白皮书</a>
+                    <a href="#" class="hover:text-amber-400 transition">开发指南</a>
+                </div>
+                <div class="h-6 w-[1px] bg-slate-800 hidden md:block"></div>
+                <button class="bg-amber-600 hover:bg-amber-500 text-white text-[11px] font-bold px-6 py-2.5 rounded-xl transition-all active:scale-95 shadow-lg shadow-amber-600/20">
+                    连接钱包
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 max-w-7xl mx-auto px-6 py-12 w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Main Auction Control -->
+        <div class="lg:col-span-8 space-y-8">
+            
+            <!-- Hero Card -->
+            <div class="glass-card rounded-[2.5rem] p-10 relative overflow-hidden auction-gradient">
+                <div class="absolute -top-32 -right-32 w-80 h-80 bg-amber-600/5 blur-[100px] rounded-full"></div>
+                
+                <div class="relative z-10">
+                    <div class="flex flex-wrap items-center gap-3 mb-6">
+                        <span class="bg-amber-500/10 text-amber-500 text-[10px] font-black px-4 py-1.5 rounded-full border border-amber-500/20 uppercase tracking-wider">
+                            正在进行: 密封递价拍卖
+                        </span>
+                        <span class="text-slate-500 text-xs font-semibold flex items-center gap-1.5">
+                            <i class="far fa-clock"></i> 离结算还剩: 02h 15m
+                        </span>
+                        <span class="ml-auto text-xs text-green-500 font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500 compute-pulse"></span>
+                            节点就绪: Arcium Devnet
+                        </span>
+                    </div>
+
+                    <h2 class="text-4xl font-bold mb-6 leading-tight text-white">
+                        加密原力: 创世资产竞标项目
+                    </h2>
+                    
+                    <p class="text-slate-400 text-base leading-relaxed mb-10 max-w-2xl">
+                        ArcBid 利用<b>全同态加密 (FHE)</b> 技术，确保投标过程的绝对私密。所有出价在链上均以密文形式存储，仅在拍卖结束时由 Arcium MXE 节点在不解密的情况下进行同态比较，自动选出获胜者。
+                    </p>
+
+                    <!-- Bid Inputs -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                        <div class="bg-slate-950/60 p-6 rounded-3xl border border-slate-800/50 group focus-within:border-amber-500/50 transition-colors">
+                            <label class="text-[10px] text-slate-500 uppercase font-bold mb-3 block tracking-widest">您的出价 (加密保护)</label>
+                            <div class="flex items-center gap-3">
+                                <input type="number" id="bidAmount" placeholder="0.00" class="bg-transparent text-2xl font-black text-white w-full outline-none mono">
+                                <span class="text-slate-600 font-bold">SOL</span>
+                            </div>
+                        </div>
+                        <div class="bg-slate-950/30 p-6 rounded-3xl border border-slate-800/30 flex items-center gap-4">
+                            <div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-amber-500">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">隐私级别</p>
+                                <p class="text-xs font-bold text-white">军用级 FHE 加密</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Interface -->
+                    <div id="actionInterface" class="space-y-4">
+                        <button onclick="submitBid()" class="w-full text-white font-black py-5 rounded-2xl glow-button flex items-center justify-center gap-3 text-lg">
+                            <i class="fas fa-lock"></i> 提交加密标单
+                        </button>
+                    </div>
+
+                    <!-- Processing State -->
+                    <div id="processingState" class="hidden py-8 text-center space-y-6">
+                        <div class="flex justify-center gap-3">
+                            <div class="w-3 h-3 bg-amber-500 rounded-full animate-bounce"></div>
+                            <div class="w-3 h-3 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.15s"></div>
+                            <div class="w-3 h-3 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                        </div>
+                        <div class="space-y-2">
+                            <p class="text-sm font-bold text-amber-500 uppercase tracking-widest" id="mxeStatus">执行 Arcis 同态提升...</p>
+                            <p class="text-[10px] text-slate-500 mono">正在通过计算偏移量 0x456 路由至集群</p>
+                        </div>
+                    </div>
+
+                    <!-- Success State -->
+                    <div id="successState" class="hidden bg-amber-500/5 border border-amber-500/20 p-8 rounded-[2rem] flex items-center gap-6 fade-in">
+                        <div class="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-check-double text-amber-500 text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-amber-100 text-lg">标单已进入机密池</p>
+                            <p class="text-xs text-amber-500/60 font-mono mt-1">Computation ID: F7rdxg3f...7CRd</p>
+                        </div>
+                        <button onclick="location.reload()" class="ml-auto text-[10px] font-black text-slate-400 hover:text-white transition uppercase">完成</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-3xl space-y-4 border-b-4 border-b-amber-600/40">
+                    <div class="text-amber-500"><i class="fas fa-eye-slash text-xl"></i></div>
+                    <h4 class="font-bold text-sm">零观测竞价</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">在计算最终结果前，即使是拍卖发起方也无法看到您的具体出价。</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl space-y-4 border-b-4 border-b-indigo-600/40">
+                    <div class="text-indigo-400"><i class="fas fa-code text-xl"></i></div>
+                    <h4 class="font-bold text-sm">条件逻辑电路</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">采用 Arcis 同态比较算子，在密文空间自动执行 Winner Selection 逻辑。</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl space-y-4 border-b-4 border-b-emerald-600/40">
+                    <div class="text-emerald-400"><i class="fas fa-user-shield text-xl"></i></div>
+                    <h4 class="font-bold text-sm">防抢跑机制</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">完全消除传统拍卖中的最后秒杀 (Sniping) 风险，确保公平的价格发现。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Logs -->
+        <div class="lg:col-span-4 flex flex-col gap-6">
+            <div class="glass-card rounded-[2.5rem] p-8 flex-1 flex flex-col min-h-[500px]">
+                <div class="flex items-center justify-between mb-8">
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 flex items-center gap-2">
+                        <i class="fas fa-microchip text-amber-500/60"></i> MXE 计算实时日志
+                    </h3>
+                    <span class="flex h-2 w-2 relative">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                </div>
+                
+                <div id="logContainer" class="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar mono text-[10px] leading-relaxed">
+                    <!-- Logs will be dynamically injected -->
+                </div>
+
+                <div class="mt-8 pt-8 border-t border-slate-800 space-y-4">
+                    <div class="flex justify-between text-[10px] font-bold">
+                        <span class="text-slate-500 uppercase tracking-widest">部署 ID (PID)</span>
+                        <span class="text-white mono">CYxNnZXv...M7HD</span>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold">
+                        <span class="text-slate-500 uppercase tracking-widest">集群节点</span>
+                        <span class="text-amber-500">Recovery Set (4)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Small Card -->
+            <div class="bg-amber-600/5 border border-amber-500/10 rounded-3xl p-6">
+                <p class="text-[10px] text-slate-500 leading-relaxed font-medium italic">
+                    "全同态加密 (FHE) 正在将区块链治理从公开的‘全景监狱’转变为受保护的‘机密协议’。"
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-10 border-t border-slate-800/30 text-center">
+        <p class="text-slate-600 text-[10px] font-black uppercase tracking-[0.4em]">ArcBid Confidential Protocol &copy; 2026</p>
+    </footer>
+
+    <script>
+        const logContainer = document.getElementById('logContainer');
+        const mxeStatus = document.getElementById('mxeStatus');
+        const actionInterface = document.getElementById('actionInterface');
+        const processingState = document.getElementById('processingState');
+        const successState = document.getElementById('successState');
+
+        const techLogs = [
+            "监听 MXE 地址: 388dp7huk...Qi9C",
+            "正在加载指令定义: resolve_auction",
+            "同步集群快照 (Offset: 456)",
+            "正在检测机密内存池中的加密标单...",
+            "节点正在处理 ZK 范围证明...",
+            "同步状态: 计算周期 Epoch 42 正在运行",
+            "正在向 Solana 发射合约心跳..."
+        ];
+
+        function addLog(text, type = 'system') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            const log = document.createElement('div');
+            log.className = 'fade-in';
+            
+            let colorClass = 'text-slate-500';
+            if (type === 'action') colorClass = 'text-amber-400';
+            if (type === 'success') colorClass = 'text-emerald-500 font-bold';
+            
+            log.innerHTML = `<span class="text-slate-700 mr-2">${time}</span> <span class="${colorClass}">${text}</span>`;
+            logContainer.prepend(log);
+            
+            if (logContainer.childNodes.length > 30) logContainer.lastChild.remove();
+        }
+
+        function submitBid() {
+            const amount = document.getElementById('bidAmount').value;
+            if (!amount || amount <= 0) {
+                return;
+            }
+
+            actionInterface.classList.add('hidden');
+            processingState.classList.remove('hidden');
+            
+            const processSteps = [
+                "正在生成临时 X25519 密钥对...",
+                "正在执行密文提升 (u64 -> ArcisType)...",
+                "正在向集群广播加密计算请求...",
+                "MXE 已确认收录。等待下一区块结算..."
+            ];
+
+            let step = 0;
+            const stepInterval = setInterval(() => {
+                mxeStatus.innerText = processSteps[step];
+                addLog(`[TX] 处理加密投标请求: ${amount} SOL`, 'action');
+                step++;
+                if (step >= processSteps.length) {
+                    clearInterval(stepInterval);
+                    setTimeout(showSuccess, 600);
+                }
+            }, 1000);
+        }
+
+        function showSuccess() {
+            processingState.classList.add('hidden');
+            successState.classList.remove('hidden');
+            addLog("🎉 结算指令成功触发，获胜者索引已加密存储。", "success");
+        }
+
+        // Background Simulation
+        setInterval(() => {
+            const randomLog = techLogs[Math.floor(Math.random() * techLogs.length)];
+            addLog(`[SYS] ${randomLog}`);
+        }, 4000);
+
+        // Initial Logs
+        addLog("[BOOT] ArcBid 核心模块加载就绪");
+        addLog("[NET] 已建立与 Arcium Devnet 的安全通信链接");
+    </script>
+</body>
+</html>

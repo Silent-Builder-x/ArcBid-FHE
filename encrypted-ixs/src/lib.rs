@@ -2,44 +2,54 @@ use arcis::*;
 
 #[encrypted]
 mod blind_auction {
-    // 关键修正：加密模块内部只允许这一种导入方式
     use arcis::*;
 
-    pub struct AuctionInputs {
-        pub bids: [u64; 2],
+    pub struct AuctionBatch {
+        // 固定处理 4 个竞标者的出价
+        pub bids: [u64; 4],
     }
 
     pub struct AuctionResult {
-        pub winner_index: u64,
-        pub winning_bid: u64,
+        pub winner_index: u64, // 赢家的索引 (0-3)
+        pub winning_bid: u64,  // 最终成交价
     }
 
     #[instruction]
     pub fn resolve_auction(
-        input_ctxt: Enc<Shared, AuctionInputs>
+        batch_ctxt: Enc<Shared, AuctionBatch>
     ) -> Enc<Shared, AuctionResult> {
-        let input = input_ctxt.to_arcis();
+        let batch = batch_ctxt.to_arcis();
         
-        let bid_0 = input.bids[0];
-        let bid_1 = input.bids[1];
+        // --- 第一轮比较 (Semi-Finals) ---
+        
+        // 比较 Bid 0 vs Bid 1
+        let bid0 = batch.bids[0];
+        let bid1 = batch.bids[1];
+        let win01 = bid0 >= bid1;
+        let (best_01_idx, best_01_val) = if win01 { (0u64, bid0) } else { (1u64, bid1) };
 
-        // 执行同态比较：直接使用重载运算符
-        // 这会产生一个加密布尔值
-        let is_zero_winner = bid_0 >= bid_1;
+        // 比较 Bid 2 vs Bid 3
+        let bid2 = batch.bids[2];
+        let bid3 = batch.bids[3];
+        let win23 = bid2 >= bid3;
+        let (best_23_idx, best_23_val) = if win23 { (2u64, bid2) } else { (3u64, bid3) };
 
-        // 关键修正：改用 if-else 表达式
-        // Arcium 宏会将这种结构识别为三元选择算子 (mux)
-        let (winner_index, winning_bid) = if is_zero_winner {
-            (0u64, bid_0)
-        } else {
-            (1u64, bid_1)
+        // --- 第二轮比较 (Finals) ---
+        
+        // 比较胜者组
+        let win_final = best_01_val >= best_23_val;
+        let (final_idx, final_val) = if win_final { 
+            (best_01_idx, best_01_val) 
+        } else { 
+            (best_23_idx, best_23_val) 
         };
 
         let result = AuctionResult {
-            winner_index,
-            winning_bid,
+            winner_index: final_idx,
+            winning_bid: final_val,
         };
 
-        input_ctxt.owner.from_arcis(result)
+        // 结果加密返回给拍卖发起人(Auctioneer)进行公示
+        batch_ctxt.owner.from_arcis(result)
     }
 }

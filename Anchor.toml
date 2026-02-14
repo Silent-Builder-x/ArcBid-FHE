@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-arc_bid_fhe = "FVLPdJiAntzb8DpzwTdcdzYSV98GiL5RaFnmHrRwB7ge"
+test = "9UWqXVP8VhXfsdDxLWu9C5igZgNFYNesHXZrKNEBYr94"
 
 [registry]
 url = "https://api.apr.dev"

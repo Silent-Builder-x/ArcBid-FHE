@@ -14,22 +14,22 @@ pub mod arcbid {
         Ok(())
     }
 
-    /// [新增] 初始化拍卖场
+    /// [New] Initialize the auction
     pub fn create_auction(ctx: Context<CreateAuction>) -> Result<()> {
         let auction = &mut ctx.accounts.auction;
         auction.authority = ctx.accounts.authority.key();
         auction.bid_count = 0;
         auction.is_open = true;
-        // 初始化为空数组
+        // Initialize as an empty array
         auction.encrypted_bids = [[0u8; 32]; 4]; 
         Ok(())
     }
 
-    /// [新增] 盲注出价 (Place Blind Bid)
-    /// 用户提交加密后的出价，存入链上插槽
+    /// [New] Place a blind bid
+    /// Users submit encrypted bids locally, which are stored in on-chain slots
     pub fn place_bid(
         ctx: Context<PlaceBid>,
-        encrypted_amount: [u8; 32], // 用户在本地加密后的出价
+        encrypted_amount: [u8; 32], // User's locally encrypted bid
     ) -> Result<()> {
         let auction = &mut ctx.accounts.auction;
         require!(auction.is_open, AuctionError::AuctionClosed);
@@ -44,8 +44,8 @@ pub mod arcbid {
         Ok(())
     }
 
-    /// [升级] 结算拍卖
-    /// 将收集到的 4 个加密出价打包发送给 Arcium
+    /// [Upgrade] Resolve the auction
+    /// Collect the 4 encrypted bids and send them to Arcium
     pub fn resolve_auction(
         ctx: Context<ResolveAuction>,
         computation_offset: u64,
@@ -53,9 +53,9 @@ pub mod arcbid {
         nonce: u128,
     ) -> Result<()> {
         let auction = &mut ctx.accounts.auction;
-        require!(auction.bid_count >= 2, AuctionError::NotEnoughBids); // 至少2人才能开拍
+        require!(auction.bid_count >= 2, AuctionError::NotEnoughBids); // At least 2 participants are required
         
-        auction.is_open = false; // 关闭拍卖
+        auction.is_open = false; // Close the auction
         
         ctx.accounts.sign_pda_account.bump = ctx.bumps.sign_pda_account;
         
@@ -63,8 +63,8 @@ pub mod arcbid {
             .x25519_pubkey(pubkey)
             .plaintext_u128(nonce);
 
-        // 注入所有收集到的加密出价
-        // 注意：如果不足4个，剩余的默认为0 (初始化值)，不影响比大结果
+        // Inject all collected encrypted bids
+        // Note: If there are fewer than 4, the remaining ones default to 0 (initialized value), which does not affect the comparison
         for bid in &auction.encrypted_bids {
             builder = builder.encrypted_u64(*bid);
         }
@@ -73,7 +73,7 @@ pub mod arcbid {
             ctx.accounts,
             computation_offset,
             builder.build(),
-            // 修正 1: 使用正确的结构体名称 ResolveAuctionCallback
+            // Fix 1: Use the correct struct name ResolveAuctionCallback
             vec![ResolveAuctionCallback::callback_ix(
                 computation_offset,
                 &ctx.accounts.mxe_account,
@@ -87,7 +87,7 @@ pub mod arcbid {
 
     #[arcium_callback(encrypted_ix = "resolve_auction")]
     pub fn resolve_auction_callback(
-        // 修正 2: 使用正确的结构体名称
+        // Fix 2: Use the correct struct name
         ctx: Context<ResolveAuctionCallback>,
         output: SignedComputationOutputs<ResolveAuctionOutput>,
     ) -> Result<()> {
@@ -96,7 +96,7 @@ pub mod arcbid {
             Err(_) => return Err(ErrorCode::AbortedComputation.into()),
         };
 
-        // 解析结果
+        // Parse the result
         let idx_bytes: [u8; 8] = o.ciphertexts[0][0..8].try_into().unwrap();
         let amount_bytes: [u8; 8] = o.ciphertexts[1][0..8].try_into().unwrap();
 
@@ -107,7 +107,7 @@ pub mod arcbid {
         msg!("Winner Index: {}", winner_idx);
         msg!("Winning Amount: {}", win_amount);
 
-        // 这里可以通过 winner_idx 从 Auction 账户中找到对应的 Pubkey 进行转账逻辑
+        // Here, you can use winner_idx to find the corresponding Pubkey in the Auction account and implement transfer logic
         
         emit!(AuctionEndEvent {
             winner_idx: winner_idx as u8,
@@ -124,7 +124,7 @@ pub struct CreateAuction<'info> {
     #[account(
         init, 
         payer = authority, 
-        space = 8 + 32 + 1 + 1 + (32 * 4) + (32 * 4), // 估算空间
+        space = 8 + 32 + 1 + 1 + (32 * 4) + (32 * 4), // Estimate space
         seeds = [b"auction", authority.key().as_ref()],
         bump
     )]
@@ -147,13 +147,13 @@ pub struct AuctionState {
     pub authority: Pubkey,
     pub is_open: bool,
     pub bid_count: u8,
-    // 存储加密出价
+    // Store encrypted bids
     pub encrypted_bids: [[u8; 32]; 4],
-    // 存储对应的竞标者公钥 (明文), 用于结算后根据索引发奖
+    // Store the corresponding bidder public keys (plaintext), used for post-auction reward distribution
     pub bidder_keys: [Pubkey; 4],
 }
 
-// 修正 3: 添加必需的 queue_computation_accounts 宏
+// Fix 3: Add the required queue_computation_accounts macro
 #[queue_computation_accounts("resolve_auction", payer)]
 #[derive(Accounts)]
 #[instruction(computation_offset: u64)]
@@ -189,7 +189,7 @@ pub struct ResolveAuction<'info> {
     pub arcium_program: Program<'info, Arcium>,
 }
 
-// 修正 4: 结构体改名为 ResolveAuctionCallback
+// Fix 4: Rename the struct to ResolveAuctionCallback
 #[callback_accounts("resolve_auction")]
 #[derive(Accounts)]
 pub struct ResolveAuctionCallback<'info> {

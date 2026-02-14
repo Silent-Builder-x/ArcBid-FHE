@@ -120,7 +120,7 @@
                     </h2>
                     
                     <p class="text-slate-400 text-base leading-relaxed mb-10 max-w-2xl">
-                        ArcBid 利用<b>全同态加密 (FHE)</b> 技术，确保投标过程的绝对私密。所有出价在链上均以密文形式存储，仅在拍卖结束时由 Arcium MXE 节点在不解密的情况下进行同态比较，自动选出获胜者。
+                        ArcBid 利用<b>多方安全计算 (MPC)</b> 技术，确保投标过程的绝对私密。所有出价在链上均以 Secret Shares 形式存储，仅在拍卖结束时由 Arcium MXE 节点在不解密的情况下进行同态比较，自动选出获胜者。
                     </p>
 
                     <!-- Bid Inputs -->
@@ -138,7 +138,7 @@
                             </div>
                             <div>
                                 <p class="text-[10px] text-slate-500 uppercase font-black tracking-widest">隐私级别</p>
-                                <p class="text-xs font-bold text-white">军用级 FHE 加密</p>
+                                <p class="text-xs font-bold text-white">军用级 MPC 加密</p>
                             </div>
                         </div>
                     </div>
@@ -158,7 +158,7 @@
                             <div class="w-3 h-3 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
                         </div>
                         <div class="space-y-2">
-                            <p class="text-sm font-bold text-amber-500 uppercase tracking-widest" id="mxeStatus">执行 Arcis 同态提升...</p>
+                            <p class="text-sm font-bold text-amber-500 uppercase tracking-widest" id="mxeStatus">执行 Arcis 秘密共享...</p>
                             <p class="text-[10px] text-slate-500 mono">正在通过计算偏移量 0x456 路由至集群</p>
                         </div>
                     </div>
@@ -229,7 +229,7 @@
             <!-- Footer Small Card -->
             <div class="bg-amber-600/5 border border-amber-500/10 rounded-3xl p-6">
                 <p class="text-[10px] text-slate-500 leading-relaxed font-medium italic">
-                    "全同态加密 (FHE) 正在将区块链治理从公开的‘全景监狱’转变为受保护的‘机密协议’。"
+                    "多方安全计算 (MPC) 正在将区块链治理从公开的‘全景监狱’转变为受保护的‘机密协议’。"
                 </p>
             </div>
         </div>
@@ -282,7 +282,7 @@
             
             const processSteps = [
                 "正在生成临时 X25519 密钥对...",
-                "正在执行密文提升 (u64 -> ArcisType)...",
+                "正在执行 MPC 秘密共享 (Secret Sharing)...",
                 "正在向集群广播加密计算请求...",
                 "MXE 已确认收录。等待下一区块结算..."
             ];

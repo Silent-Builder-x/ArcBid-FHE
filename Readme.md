@@ -1,33 +1,31 @@
-# ArcBid-FHE: Decentralized Confidential Auction Protocol
+# ArcBid: MPC-Powered Decentralized Confidential Auction ⚖️
 
 ## 🛡️ Overview
 
-**ArcBid-FHE** is a high-performance, sealed-bid auction protocol built on the **Arcium** network and **Solana**.
+**ArcBid** is a high-performance, sealed-bid auction protocol built on the **Arcium** network and **Solana**.
 
-By leveraging **Fully Homomorphic Encryption (FHE)**, ArcBid ensures that all bids remain completely encrypted throughout the entire auction lifecycle. The winner determination (Greater-Than comparison) is executed homomorphically within the **Multi-Party Execution (MXE)** environment, meaning not even the nodes processing the computation can observe individual bid amounts.
+By leveraging **Secure Multi-Party Computation (MPC)**, ArcBid ensures that all bids remain completely hidden throughout the entire auction lifecycle. The winner determination (Greater-Than comparison) is executed obliviously within the **Multi-Party Execution (MXE)** environment, meaning not even the nodes processing the computation can observe individual bid amounts.
 
-## 🚀 Live Deployment Status (Verified)
+## 🚀 Live Deployment Status (Verified on Devnet v0.8.3)
 
 This protocol has been successfully built and deployed to the Arcium Devnet.
 
-- **MXE Address:** `388dp7hukArJbh3pnPg1n4jvTCY333mDnvwrRchyQi9C`
-- **MXE Program ID:** `CYxNnZXvZQMrxFuzmP1NYXZrgpJpBaWHH5u5eGzaM7HD`
-- **Authority:** `AjUstj3Qg296mz6DFcXAg186zRvNKuFfjB7JK2Z6vS7R`
-- **Computation Definition:** `F7rdxg3fCswZa9euuXZs3FEi7VkHcQN4Tv5YycGc7CRd`
-- **Status:** `Active`
+### 🖥️ Interactive Demo
+
+[Launch ArcBid Terminal](https://silent-builder-x.github.io/ArcBid-FHE/)
 
 ## 🧠 Core Innovation: Confidential Logic
 
 Unlike standard on-chain auctions where bid transparency leads to "Sniping" or MEV leakage, ArcBid provides:
 
-- **Blind Bidding:** Bids are cast as ciphertexts on-chain.
-- **Homomorphic Comparison:** The Arcis circuit uses secure multiplexing (`if-else` mux logic) to find the highest bidder without decryption.
+- **Blind Bidding:** Bids are split into **Secret Shares** (Shamir's Secret Sharing) at the client side before submission.
+- **Oblivious Comparison:** The Arcis circuit uses secure multiplexing (`if-else` mux logic) to find the highest bidder without reconstructing the raw values.
 - **MEV Resistance:** Eliminates front-running risks as validators cannot observe the auction's trending state.
 
 ## 🛠 Build & Implementation
 
 ```
-# Prerequisites: Solana Agave (v3.1.8+), Arcium CLI
+# Prerequisites: Solana Agave Arcium CLI
 arcium build
 
 # Deployment
@@ -37,6 +35,6 @@ arcium deploy --cluster-offset 456 --recovery-set-size 4 --keypair-path ~/.confi
 
 ## 📄 Technical Specs
 
-- **Logic:** `resolve_auction` (Arcis Circuit)
+- **Logic:** `resolve_auction` (Arcis-MPC Circuit)
 - **Settlement:** Verified Callback via Anchor-based Ledger.
 - **Security:** Recovery Set Size 4 on Arcium Cluster 456.
